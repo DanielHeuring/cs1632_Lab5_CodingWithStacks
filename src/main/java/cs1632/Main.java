@@ -28,6 +28,40 @@ public class Main {
         return tokens;
     }
 
+    public static int evaluatePrefix(ArrayList<Token> tokens, int[] idx) {
+        if (idx[0] >= tokens.size()) {
+            return 0;
+        }
+        Token tok = tokens.get(idx[0]++);
+        if (tok instanceof NumToken) {
+            return ((NumToken) tok).value;
+        } else if (tok instanceof OpToken) {
+            OpToken opTok = (OpToken) tok;
+            int op = opTok.getOperator();
+            if (op == ';') {
+                return 0;
+            }
+            int left = evaluatePrefix(tokens, idx);
+            int right = evaluatePrefix(tokens, idx);
+            switch (op) {
+                case '+':
+                    return left + right;
+                case '-':
+                    return left - right;
+                case '*':
+                    return left * right;
+                case '/':
+                    if (right == 0) {
+                        throw new ArithmeticException("Divide by zero");
+                    }
+                    return left / right;
+                default:
+                    throw new IllegalArgumentException("Unknown operator: " + (char) op);
+            }
+        }
+        return 0;
+    }
+
     public static void main(String[] args) {
         try {
             Tokenizer myScanner = new Tokenizer(System.in);
@@ -37,13 +71,9 @@ public class Main {
                 System.out.print("Equation: ");
                 tokenSequence = getNextSequence(myScanner);
                 if (tokenSequence != null) {
-                    // Replace the code starting here with code to evaluate the expression
-                    System.out.print("Read equation: ");
-                    for (Token tok : tokenSequence) {
-                        System.out.print(tok.getTokenString() + " ");
-                    }
-                    System.out.println();
-                    // End where to replace
+                    int[] idx = {0};
+                    int result = evaluatePrefix(tokenSequence, idx);
+                    System.out.println("Result: " + result);
                 }
             } while (tokenSequence != null);
         }
